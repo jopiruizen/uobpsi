@@ -2,15 +2,21 @@ import React, { Component } from 'react';
 
 
 import '../../node_modules/react-vis/dist/style.css';
-import {XYPlot, Crosshair, LineSeries, LineMarkSeries, XAxis, YAxis, VerticalGridLines, HorizontalGridLines} from 'react-vis';
+import {XYPlot, LabelSeries, Crosshair, LineSeries, LineMarkSeries, XAxis, YAxis, VerticalGridLines, HorizontalGridLines} from 'react-vis';
 
 
 class PSIChart extends Component {
 
 
+	labelStyle = {
+		fontSize:'12px' 
+	}
+
+	datastore =  {};
 
 	constructor (props){
 		super(props );
+
 		this.state = {
 			east: [],
 			west: [],
@@ -27,9 +33,7 @@ class PSIChart extends Component {
 			central_opacity: 0.8,
 
 			chart_width: 600,
-			chart_height: 320,
-
-			crosshair_data: []
+			chart_height: 320 
 		}
 
 		this.container = React.createRef();
@@ -37,13 +41,19 @@ class PSIChart extends Component {
 	}
 
 	xLabelFormat = ( x ) => {
-		//return x;
-		return  "" + this.state.east[x].hour;
+		return  "" + this.datastore.east[x].hour;
 	}
 
 
 	shouldComponentUpdate( nextProp, nextState ) {
 		if( nextProp.chartData != null &&  nextProp.chartData != undefined ) {
+
+			this.datastore.east = nextProp.chartData.east;
+			this.datastore.west = nextProp.chartData.west;
+			this.datastore.north = nextProp.chartData.north;
+			this.datastore.south = nextProp.chartData.south;
+			this.datastore.national = nextProp.chartData.national;
+			this.datastore.central = nextProp.chartData.central;
 			 
 			this.state.east = nextProp.chartData.east;
 			this.state.west = nextProp.chartData.west;
@@ -68,23 +78,24 @@ class PSIChart extends Component {
 	checkToggles ( toggles ) {
 		//console.log("Check Toggles");
 		let opacity_value = 0.8;
+		let style = this.labelStyle;
 		if( toggles.isOn == false ) {
 			opacity_value = 0;
-		}  
-		this.state[toggles.name +"_opacity"] = opacity_value;
+			this.state[toggles.name] = [];
+		}  else {
+			this.state[toggles.name] = this.datastore[toggles.name];
+		}
+		 
+
+
+		//this.state[toggles.name +"_opacity"] = opacity_value;
+		//this.state[toggles.name + "_style"] = style;
+		
 		this.setState({dummy:""});
+	}
  
-	}
-
-	/*
-		  <MarkSeries opacity={this.state.east_opacity} data={this.state.east}  fill="#FF0000" stroke="#FF0000"/>
-	*/
-
-	chartInteract = ( data, event ) => {
-		console.log( "PSIChart.chartInteract() " );
-		console.log(data);
-		this.setState({crosshair_data: [data]});
-	}
+  
+ 
 	 
 	render() {
  		 
@@ -99,24 +110,51 @@ class PSIChart extends Component {
 					  <XAxis tickFormat={this.xLabelFormat} tickTotal={10}/>
 					  <YAxis />
 
-					  <LineMarkSeries  opacity={this.state.north_opacity} data={this.state.north} color="#51BAF2"  stroke="#51BAF2"
-					  	onValueClick={this.chartInteract}
+					  <LineSeries  opacity={this.state.north_opacity} data={this.state.north} color="#51BAF2"  stroke="#51BAF2"
 					  />
 
-					  <LineMarkSeries opacity={this.state.east_opacity} data={this.state.east}  color="#71CA58" stroke="#71CA58"/>
-					  
-					  <LineMarkSeries opacity={this.state.south_opacity} data={this.state.south} color="#F7A650"  stroke="#F7A650"/>
-					  
-					  <LineMarkSeries opacity={this.state.west_opacity} data={this.state.west}  color="#D08CE0" stroke="#D08CE0"/>
-					  
-					  <LineMarkSeries opacity={this.state.central_opacity} data={this.state.central}  color="#138897" stroke="#138897"/>
-					  
-					  <LineMarkSeries opacity={this.state.national_opacity} data={this.state.national}  color="#FD6461"  stroke="#FD6461"/>
+					  <LabelSeries opacity={this.state.north_opacity} data={this.state.north}  color="#FD6461"  stroke="#FD6461" 
+					  	labelAnchorX="left" labelAnchorY="middle" style={this.labelStyle}
+					  />
 
-					 <Crosshair
-         				 values={this.state.crosshair_data}
-         				 className={'crosshair'}
-       					 />
+
+					  <LineSeries opacity={this.state.east_opacity} data={this.state.east}  color="#71CA58" stroke="#71CA58"
+
+					  />
+					  
+					  <LabelSeries opacity={this.state.east_opacity} data={this.state.east}  color="#FD6461"  stroke="#FD6461" 
+					  	labelAnchorX="left" labelAnchorY="middle" style={this.labelStyle}
+					  />
+
+
+					  <LineSeries opacity={this.state.south_opacity} data={this.state.south} color="#F7A650"  stroke="#F7A650"/>
+					  
+					   <LabelSeries opacity={this.state.south_opacity} data={this.state.south}  color="#FD6461"  stroke="#FD6461" 
+					  	labelAnchorX="left" labelAnchorY="middle" style={this.labelStyle}
+					  />
+
+
+					  <LineSeries opacity={this.state.west_opacity} data={this.state.west}  color="#D08CE0" stroke="#D08CE0"/>
+					  
+					  <LabelSeries opacity={this.state.west_opacity} data={this.state.west}  color="#FD6461"  stroke="#FD6461" 
+					  	labelAnchorX="left" labelAnchorY="middle" style={this.labelStyle}
+					  />
+
+
+					  <LineSeries opacity={this.state.central_opacity} data={this.state.central}  color="#138897" stroke="#138897"
+					  	onValueClick={this.chartInteract}
+					  />
+					  
+					  <LabelSeries opacity={this.state.central_opacity} data={this.state.central}  color="#FD6461"  stroke="#FD6461" 
+					  	labelAnchorX="left" labelAnchorY="middle" style={this.labelStyle}
+					  />
+
+
+					  <LineSeries opacity={this.state.national_opacity} data={this.state.national}  color="#FD6461"  stroke="#FD6461" />
+					  <LabelSeries opacity={this.state.national_opacity} data={this.state.national}  color="#FD6461"  stroke="#FD6461" 
+					  	labelAnchorX="left" labelAnchorY="middle" style={this.labelStyle}
+					  />
+ 		
 
 		 		</XYPlot>
 	    	</div>

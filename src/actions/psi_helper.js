@@ -90,7 +90,7 @@ class PSIHelper  {
 		let y = psi;
 		 this.data[region].push (  
 		 		{
-		 			x: x , y: y , hour: hour, psi: psi
+		 			x: x , y: y , hour: hour, psi: psi, label: "" + y, size:12
 		 		}     
 		 	)
 	}
