@@ -18,25 +18,47 @@ export function load_settings () {
 	 
 }
 
+function dateStringFromDate ( date ) {
+	let year = date.getFullYear();
+	let day = date.getDate();
+	let month = date.getMonth() + 1;
+	if( day < 10 ) day = "0" + day;
+	if( month  < 10 ) month = "0" + month;
+	return year + "-" + month + "-" + day;
+}
+
 
 
 export async  function  get_psi () {
  	
 	let date = new Date();
 
-	let year = date.getFullYear();
-	let day = date.getDate();
-	let month = date.getMonth() + 1;
-	if( day < 10 ) day = "0" + day;
-	if( month  < 10 ) month = "0" + month;
-	let datestr = year + "-" + month + "-" + day;
+	 
+	let datestr = dateStringFromDate( date ) ;
 
 
 	let req = new HTTPService();	
+
 	let promise = req.get("https://api.data.gov.sg/v1/environment/psi?date=" + datestr  );
 	let data = await promise;
 	let psi = JSON.parse( data.response );
 	 
+
+	//if( psi.items < 10 ) {
+		date.setDate( date.getDate() - 1);
+		datestr = dateStringFromDate(date);
+		promise = req.get("https://api.data.gov.sg/v1/environment/psi?date=" + datestr  );	
+		
+		data = await promise;
+		let yesterday_psi = JSON.parse ( data.response );
+		psi.items = yesterday_psi.items.concat (  psi.items );
+		console.log( psi.items );
+	//}
+
+	
+
+
+
 	let helper =new PSIHelper();
 	/*
 	console.log( "PSI Data");
